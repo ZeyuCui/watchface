@@ -1,36 +1,26 @@
 package edu.neu.test1
 
+import android.R.attr.x
+import android.R.attr.y
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.ColorMatrix
-import android.graphics.ColorMatrixColorFilter
-import android.graphics.Paint
-import android.graphics.Rect
+import android.graphics.*
 import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Message
-import androidx.palette.graphics.Palette
 import android.support.wearable.watchface.CanvasWatchFaceService
 import android.support.wearable.watchface.WatchFaceService
 import android.support.wearable.watchface.WatchFaceStyle
-import android.util.Log
 import android.view.SurfaceHolder
-import android.widget.TextView
 import android.widget.Toast
-
+import androidx.palette.graphics.Palette
 import java.lang.ref.WeakReference
-import java.util.Calendar
-import java.util.TimeZone
+import java.util.*
+
 
 /**
  * Updates rate in milliseconds for interactive mode. We update once a second to advance the
@@ -64,7 +54,7 @@ private const val SHADOW_RADIUS = 6f
  * in the Google Watch Face Code Lab:
  * https://codelabs.developers.google.com/codelabs/watchface/index.html#0
  */
-class MyWatchFace : CanvasWatchFaceService() , SensorEventListener {
+class MyWatchFace : CanvasWatchFaceService(){
 
     private var mSensorManager : SensorManager?=null
     private var mHeartRate : Sensor ?= null
@@ -148,13 +138,13 @@ class MyWatchFace : CanvasWatchFaceService() , SensorEventListener {
                 color = Color.BLACK
             }
             mBackgroundBitmap =
-                BitmapFactory.decodeResource(resources, R.drawable.watchface_service_bg)
+                BitmapFactory.decodeResource(resources, R.drawable.watchface)
 
             /* Extracts colors from background image to improve watchface style. */
             Palette.from(mBackgroundBitmap).generate {
                 it?.let {
                     mWatchHandHighlightColor = it.getVibrantColor(Color.RED)
-                    mWatchHandColor = it.getLightVibrantColor(Color.WHITE)
+                    mWatchHandColor = it.getLightVibrantColor(Color.GRAY)
                     mWatchHandShadowColor = it.getDarkMutedColor(Color.BLACK)
                     updateWatchHandStyle()
                 }
@@ -242,8 +232,8 @@ class MyWatchFace : CanvasWatchFaceService() , SensorEventListener {
         private fun updateWatchHandStyle() {
             if (mAmbient) {
                 mHourPaint.color = Color.WHITE
-                mMinutePaint.color = Color.WHITE
-                mSecondPaint.color = Color.WHITE
+                mMinutePaint.color = Color.DKGRAY
+                mSecondPaint.color = Color.DKGRAY
                 mTickAndCirclePaint.color = Color.WHITE
 
                 mHourPaint.isAntiAlias = false
@@ -380,8 +370,16 @@ class MyWatchFace : CanvasWatchFaceService() , SensorEventListener {
 
             drawBackground(canvas)
             drawWatchFace(canvas)
+            drawHeartRate(canvas)
         }
+        private fun drawHeartRate(canvas: Canvas){
+            val paint = Paint()
+           // canvas.drawPaint(paint)
+            paint.color = Color.RED
+            paint.textSize = 35f
+            canvas.drawText("heartRate",mCenterX/19*17,mCenterY/5*8,paint)
 
+        }
         private fun drawBackground(canvas: Canvas) {
 
             if (mAmbient && (mLowBitAmbient || mBurnInProtection)) {
@@ -540,7 +538,7 @@ class MyWatchFace : CanvasWatchFaceService() , SensorEventListener {
         }
     }
 
-    override fun onSensorChanged(event: SensorEvent?) {
+  /*  override fun onSensorChanged(event: SensorEvent?) {
         if (event != null) {
            // findViewById<TextView>(R.id.text).text = event.values[0].toString()
             Log.v("testprint",event.values[0].toString())
@@ -549,5 +547,5 @@ class MyWatchFace : CanvasWatchFaceService() , SensorEventListener {
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
         //
-    }
+    }*/
 }
