@@ -8,6 +8,8 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.*
 import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
 import android.os.Handler
@@ -15,6 +17,7 @@ import android.os.Message
 import android.support.wearable.watchface.CanvasWatchFaceService
 import android.support.wearable.watchface.WatchFaceService
 import android.support.wearable.watchface.WatchFaceStyle
+import android.util.Log
 import android.view.SurfaceHolder
 import android.widget.Toast
 import androidx.palette.graphics.Palette
@@ -54,10 +57,9 @@ private const val SHADOW_RADIUS = 6f
  * in the Google Watch Face Code Lab:
  * https://codelabs.developers.google.com/codelabs/watchface/index.html#0
  */
-class MyWatchFace : CanvasWatchFaceService(){
+class MyWatchFace : CanvasWatchFaceService()  {
 
-    private var mSensorManager : SensorManager?=null
-    private var mHeartRate : Sensor ?= null
+
 
     override fun onCreateEngine(): Engine {
         return Engine()
@@ -76,7 +78,10 @@ class MyWatchFace : CanvasWatchFaceService(){
         }
     }
 
-    inner class Engine : CanvasWatchFaceService.Engine() {
+    inner class Engine : CanvasWatchFaceService.Engine(), SensorEventListener{
+
+        private var mSensorManager : SensorManager?=null
+        private var mHeartRate : Sensor ?= null
 
         private lateinit var mCalendar: Calendar
 
@@ -106,9 +111,12 @@ class MyWatchFace : CanvasWatchFaceService(){
         private var mAmbient: Boolean = false
         private var mLowBitAmbient: Boolean = false
         private var mBurnInProtection: Boolean = false
+        private var heart_rate: Float = 0F
 
         /* Handler to update the time once a second in interactive mode. */
         private val mUpdateTimeHandler = EngineHandler(this)
+
+
 
         private val mTimeZoneReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
@@ -119,7 +127,9 @@ class MyWatchFace : CanvasWatchFaceService(){
 
         override fun onCreate(holder: SurfaceHolder) {
             super.onCreate(holder)
-
+            mSensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+            mHeartRate = mSensorManager!!.getDefaultSensor(Sensor.TYPE_HEART_RATE)
+            mSensorManager!!.registerListener(this,mHeartRate,SensorManager.SENSOR_DELAY_NORMAL)
             setWatchFaceStyle(
                 WatchFaceStyle.Builder(this@MyWatchFace)
                     .setAcceptsTapEvents(true)
@@ -375,9 +385,9 @@ class MyWatchFace : CanvasWatchFaceService(){
         private fun drawHeartRate(canvas: Canvas){
             val paint = Paint()
            // canvas.drawPaint(paint)
-            paint.color = Color.RED
-            paint.textSize = 35f
-            canvas.drawText("heartRate",mCenterX/19*17,mCenterY/5*8,paint)
+            paint.color = 0xFFBB86FC.toInt()
+            paint.textSize = 25f
+            canvas.drawText(heart_rate.toString(),mCenterX/38*33,mCenterY/11*17,paint)
 
         }
         private fun drawBackground(canvas: Canvas) {
@@ -536,16 +546,20 @@ class MyWatchFace : CanvasWatchFaceService(){
                 mUpdateTimeHandler.sendEmptyMessageDelayed(MSG_UPDATE_TIME, delayMs)
             }
         }
-    }
 
-  /*  override fun onSensorChanged(event: SensorEvent?) {
-        if (event != null) {
-           // findViewById<TextView>(R.id.text).text = event.values[0].toString()
-            Log.v("testprint",event.values[0].toString())
+        override fun onSensorChanged(event: SensorEvent?) {
+            if (event != null) {
+                heart_rate = event.values[0]
+                Log.v("testprint",event.values[0].toString())
+            }
         }
+
+        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+            //
+        }
+
+
     }
 
-    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-        //
-    }*/
+
 }
