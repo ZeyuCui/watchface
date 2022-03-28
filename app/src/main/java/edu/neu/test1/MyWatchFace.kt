@@ -1,16 +1,18 @@
 package edu.neu.test1
 
-import android.R.attr.x
-import android.R.attr.y
+import android.Manifest
+import android.app.AlertDialog
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.graphics.*
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Message
@@ -21,6 +23,8 @@ import android.util.Log
 import android.view.SurfaceHolder
 import android.widget.Toast
 import androidx.palette.graphics.Palette
+import edu.neu.myfirstwearableapp.database.HeartDatabase
+import edu.neu.myfirstwearableapp.database.HeartRate
 import java.lang.ref.WeakReference
 import java.util.*
 
@@ -61,7 +65,10 @@ class MyWatchFace : CanvasWatchFaceService()  {
 
 
 
+
+
     override fun onCreateEngine(): Engine {
+
         return Engine()
     }
 
@@ -79,6 +86,7 @@ class MyWatchFace : CanvasWatchFaceService()  {
     }
 
     inner class Engine : CanvasWatchFaceService.Engine(), SensorEventListener{
+
 
         private var mSensorManager : SensorManager?=null
         private var mHeartRate : Sensor ?= null
@@ -142,6 +150,7 @@ class MyWatchFace : CanvasWatchFaceService()  {
             initializeBackground()
             initializeWatchFace()
         }
+
 
         private fun initializeBackground() {
             mBackgroundPaint = Paint().apply {
@@ -381,13 +390,14 @@ class MyWatchFace : CanvasWatchFaceService()  {
             drawBackground(canvas)
             drawWatchFace(canvas)
             drawHeartRate(canvas)
+            saveDatainRoomDb(heart_rate)
         }
         private fun drawHeartRate(canvas: Canvas){
             val paint = Paint()
            // canvas.drawPaint(paint)
             paint.color = 0xFFBB86FC.toInt()
             paint.textSize = 25f
-            canvas.drawText(heart_rate.toString(),mCenterX/38*33,mCenterY/11*17,paint)
+            canvas.drawText(heart_rate.toString(),mCenterX/38*32,mCenterY/11*17,paint)
 
         }
         private fun drawBackground(canvas: Canvas) {
@@ -550,13 +560,31 @@ class MyWatchFace : CanvasWatchFaceService()  {
         override fun onSensorChanged(event: SensorEvent?) {
             if (event != null) {
                 heart_rate = event.values[0]
-                Log.v("testprint",event.values[0].toString())
+                //Log.v("testprint",event.values[0].toString())
+
             }
+        }
+
+        private fun saveDatainRoomDb(current_heart_rate: Float) {
+            var current: Long = System.currentTimeMillis()
+            val hrateDao = HeartDatabase.getAppDatabase(applicationContext)?.hrDao()
+            val hrateEntity = HeartRate(0, current, current_heart_rate)
+            hrateDao?.insertAll(hrateEntity)
+            var data = hrateDao?.getAll()
+            if(data?.size!! >=10)
+            {
+
+            }
+          /*  data?.forEach {
+                Log.v("testprint", it.toString())
+            }*/
+
         }
 
         override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
             //
         }
+
 
 
     }
