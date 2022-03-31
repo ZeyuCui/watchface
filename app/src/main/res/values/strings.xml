@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">test1</string>
+    <string name="app_name">ZeyuWatchFace</string>
     <string name="message">Watch face tapped</string>
-    <string name="my_analog_name">My Analog</string>
+    <string name="my_analog_name">Zeyu Analog</string>
 </resources>

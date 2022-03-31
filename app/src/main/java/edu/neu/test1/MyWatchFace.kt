@@ -575,9 +575,9 @@ class MyWatchFace : CanvasWatchFaceService()  {
             {
 
             }
-          /*  data?.forEach {
+           data?.forEach {
                 Log.v("testprint", it.toString())
-            }*/
+            }
 
         }
 
